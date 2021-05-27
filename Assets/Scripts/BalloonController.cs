@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class BalloonController : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class BalloonController : MonoBehaviour
     private float yDirection;
     private float minY = 4f;
     private float maxY = 6f;
+
+    public TextMeshPro stockNameTMP;
+    public TextMeshPro peText;
 
     private void Awake()
     {
