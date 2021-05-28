@@ -899,7 +899,7 @@ MonoBehaviour:
   minPE: 3
   maxPE: 50
   minBalloonSpeed: 0.75
-  maxBalloonSpeed: 1.5
+  maxBalloonSpeed: 3
   balloonMaterials:
   - {fileID: 2100000, guid: 824496bd438184f0fa7fa1b99c283195, type: 2}
   - {fileID: 2100000, guid: a88dbbbaa468c7843946c90360afe20f, type: 2}
