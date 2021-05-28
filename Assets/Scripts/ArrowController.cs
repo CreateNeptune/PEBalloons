@@ -36,6 +36,9 @@ public class ArrowController : MonoBehaviour
         {
             // Increment score.
             Score(collision.collider);
+
+            // Decrement arrows.
+            gm.DecrementArrows();
         }
     }
 

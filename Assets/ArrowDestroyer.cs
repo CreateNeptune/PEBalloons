@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BalloonDestroyer : MonoBehaviour
+public class ArrowDestroyer : MonoBehaviour
 {
     private GameManager gm;
 
@@ -13,8 +13,10 @@ public class BalloonDestroyer : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.CompareTag("Balloon"))
+        if (collision.collider.CompareTag("Arrow"))
         {
+            gm.DecrementArrows();
+
             collision.gameObject.SetActive(false);
         }
     }

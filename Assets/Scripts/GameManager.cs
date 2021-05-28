@@ -14,9 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform arrowGeneratorT;
     private bool arrowAvailable = true;
     [SerializeField] private float arrowSpeed;
-    [SerializeField] private float reloadTime;
-
-    public int totalBalloons;
+    
     [SerializeField] private GameObject balloon;
     private List<GameObject> balloons = new List<GameObject>();
     [SerializeField] private GameObject arrow;
@@ -45,13 +43,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int gameOverScore;
     [SerializeField] private Text gameOverText;
     [SerializeField] private Canvas gameOverCanvas;
+    [SerializeField] private int numArrows;
+    [SerializeField] private Text arrowText;
 
     // Audio
     [SerializeField] private AudioSource camAudio;
     [SerializeField] private AudioClip arrowShot;
 
     // Game states
-    GameState gameState = GameState.pregame;
+    [SerializeField] private Canvas startCanvas;
+    public GameState gameState = GameState.pregame;
 
     public enum GameState
     {
@@ -81,27 +82,10 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator BeginGame()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(3f);
 
         gameState = GameState.gameplay;
-
-        StartCoroutine(CheckForGameOver());
-    }
-
-    private IEnumerator CheckForGameOver()
-    {
-        for (; ;)
-        {
-            yield return new WaitForSeconds(0.5f);
-
-            if (score >= gameOverScore)
-            {
-                gameState = GameState.endgame;
-                gameOverText.text = "You earned $" + score + "!";
-                gameOverCanvas.enabled = true;
-                yield break;
-            }
-        }
+        startCanvas.enabled = false;
     }
 
     public void RestartLevel()
@@ -115,7 +99,7 @@ public class GameManager : MonoBehaviour
         {
             if (gameState == GameState.endgame)
                 yield break;
-            else if (gameState == GameState.gameplay)
+            else
             {
                 // Set P/E on balloon, which will determine its distance from the arrow.
                 float randomPE = Random.Range(minPE, maxPE);
@@ -206,25 +190,28 @@ public class GameManager : MonoBehaviour
 
         // Make arrow sound.
         camAudio.PlayOneShot(arrowShot);
-
-        StartCoroutine(Reload());
     }
 
-    private IEnumerator Reload()
+    public void DecrementArrows()
     {
-        yield return new WaitForSeconds(reloadTime);
+        numArrows--;
+        arrowText.text = "x" + numArrows.ToString();
 
-        // Reload the arrow and make arrow available to fire again.
-        ReloadArrow();
-        arrowAvailable = true;
-
-        print("arrow available");
+        if (numArrows <= 0)
+        {
+            gameState = GameState.endgame;
+            gameOverText.text = "You earned $" + score + "!";
+            gameOverCanvas.enabled = true;
+        }
+        else
+            ReloadArrow();
     }
 
     private void ReloadArrow()
     {
         GameObject newArrow = CNExtensions.GetPooledObject(arrows, arrow, defaultLayer, arrowGeneratorT, Vector3.zero, Quaternion.identity, false);
         activeArrow = newArrow;
+        arrowAvailable = true;
     }
 
     public void CalculateScore(Collider balloon)
