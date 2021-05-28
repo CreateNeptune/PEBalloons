@@ -61,6 +61,9 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+
         defaultLayer = LayerMask.NameToLayer("Default");
 
         CNExtensions.CreateObjectPool(balloons, balloon, 3, defaultLayer);
@@ -292,8 +295,10 @@ public class GameManager : MonoBehaviour
                 case TouchPhase.Stationary:
                     break;
                 case TouchPhase.Canceled:
+                    playerTouching = false;
                     break;
                 case TouchPhase.Ended:
+                    playerTouching = false;
                     break;
             }
         }
