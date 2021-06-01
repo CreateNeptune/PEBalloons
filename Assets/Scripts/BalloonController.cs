@@ -46,6 +46,7 @@ public class BalloonController : MonoBehaviour
     {
         Vector3 moveVector;
 
+        // TODO: Balloons should move up instead of sideways. Get rid of x-speed.
         if (yDirection == 1 && t.position.y < maxY)
             moveVector = new Vector3(xSpeed, ySpeed, 0f) * Time.deltaTime;
         else if (yDirection == -1 && t.position.y > minY)

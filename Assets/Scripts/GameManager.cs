@@ -108,6 +108,8 @@ public class GameManager : MonoBehaviour
                 float randomPE = Random.Range(minPE, maxPE);
                 float zOffset = maxZOffset + (minZOffset - maxZOffset) / (maxPE - minPE) * randomPE;
 
+                // TODO: Balloons should also get smaller the lower the PE.
+
                 GameObject newBalloon = CNExtensions.GetPooledObject(balloons, balloon, defaultLayer, balloonGeneratorT,
                     new Vector3(0f, 0f, zOffset), Quaternion.identity, false);
 
@@ -288,9 +290,11 @@ public class GameManager : MonoBehaviour
             switch (touch.phase)
             {
                 case TouchPhase.Began:
+                    // TODO: Establish a "start point"
                     playerTouching = true;
                     break;
                 case TouchPhase.Moved:
+                    // TODO: Rotate arrow around a fixed point to aim it. Limit it to some range.
                     break;
                 case TouchPhase.Stationary:
                     break;
@@ -298,6 +302,7 @@ public class GameManager : MonoBehaviour
                     playerTouching = false;
                     break;
                 case TouchPhase.Ended:
+                    // TODO: Shoot arrow at the current angle.
                     playerTouching = false;
                     break;
             }
