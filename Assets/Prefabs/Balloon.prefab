@@ -408,7 +408,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   priceToEarnings: 25
-  xSpeed: 0.75
   ySpeed: 0.25
   stockNameTMP: {fileID: 1843088269073499654}
   peText: {fileID: 7619768058475216002}

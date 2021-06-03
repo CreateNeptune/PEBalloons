@@ -14,6 +14,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform arrowGeneratorT;
     private bool arrowAvailable = true;
     [SerializeField] private float arrowSpeed;
+    [SerializeField] private float arrowScale;
+    [SerializeField] private float minArrowRotateAngle;
+    [SerializeField] private float maxArrowRotateAngle;
     
     [SerializeField] private GameObject balloon;
     private List<GameObject> balloons = new List<GameObject>();
@@ -24,12 +27,13 @@ public class GameManager : MonoBehaviour
     // Balloon generation
     [SerializeField] private float timeBetweenBalloons;
     [SerializeField] private Transform balloonGeneratorT;
-    [SerializeField] private float minZOffset;
-    [SerializeField] private float maxZOffset;
+    [SerializeField] private float minXOffset;
+    [SerializeField] private float maxXOffset;
     [SerializeField] private float minPE;
     [SerializeField] private float maxPE;
     [SerializeField] private float minBalloonSpeed;
     [SerializeField] private float maxBalloonSpeed;
+    [SerializeField] private float minBalloonScale;
     [SerializeField] private Material[] balloonMaterials;
 
     // Scoring
@@ -106,22 +110,28 @@ public class GameManager : MonoBehaviour
             {
                 // Set P/E on balloon, which will determine its distance from the arrow.
                 float randomPE = Random.Range(minPE, maxPE);
-                float zOffset = maxZOffset + (minZOffset - maxZOffset) / (maxPE - minPE) * randomPE;
 
-                // TODO: Balloons should also get smaller the lower the PE.
+                // The distance between the balloons is calculated here as xOffset.
+                float xOffset = maxXOffset + (minXOffset - maxXOffset) / (maxPE - minPE) * randomPE;
+
+                // Balloons will get smaller the lower the PE.
+                float balloonScale = minBalloonScale + (1 - minBalloonScale) / (maxPE - minPE) * randomPE;
 
                 GameObject newBalloon = CNExtensions.GetPooledObject(balloons, balloon, defaultLayer, balloonGeneratorT,
-                    new Vector3(0f, 0f, zOffset), Quaternion.identity, false);
+                    new Vector3(xOffset, 0f, 0f), Quaternion.identity, false);
 
                 // Set random skin.
                 newBalloon.transform.GetChild(0).GetComponent<MeshRenderer>().material = balloonMaterials[Random.Range(0, balloonMaterials.Length)];
 
+                // Set Balloon Scale.
+                newBalloon.transform.localScale = new Vector3(balloonScale, balloonScale, balloonScale);
+                
                 // Set P/E on balloon.
                 BalloonController bc = newBalloon.GetComponent<BalloonController>();
                 bc.priceToEarnings = (int)randomPE;
 
                 // Set speed on balloon based on P/E.
-                bc.xSpeed = maxBalloonSpeed + (minBalloonSpeed - maxBalloonSpeed) / (maxPE - minPE) * randomPE;
+                bc.ySpeed = maxBalloonSpeed + (minBalloonSpeed - maxBalloonSpeed) / (maxPE - minPE) * randomPE;
 
                 // Set balloon text based on P/E.
                 bc.peText.text = ((int)randomPE).ToString() + "x P/E";
@@ -215,6 +225,10 @@ public class GameManager : MonoBehaviour
     private void ReloadArrow()
     {
         GameObject newArrow = CNExtensions.GetPooledObject(arrows, arrow, defaultLayer, arrowGeneratorT, Vector3.zero, Quaternion.identity, false);
+        
+        // Set arrow Scale.
+        newArrow.transform.localScale = new Vector3(arrowScale, arrowScale, arrowScale);
+        
         activeArrow = newArrow;
         arrowAvailable = true;
     }
@@ -273,6 +287,9 @@ public class GameManager : MonoBehaviour
 #if UNITY_EDITOR
         if (phoneTesting)
             GetTouchInput();
+            
+            // Test Method.
+            //GetDummyTouchInput();
         else
             playerTouching = Input.anyKey;
 #else
@@ -292,9 +309,11 @@ public class GameManager : MonoBehaviour
                 case TouchPhase.Began:
                     // TODO: Establish a "start point"
                     playerTouching = true;
+                    RotateArrow(touch.position);
                     break;
                 case TouchPhase.Moved:
                     // TODO: Rotate arrow around a fixed point to aim it. Limit it to some range.
+                    RotateArrow(touch.position);
                     break;
                 case TouchPhase.Stationary:
                     break;
@@ -307,5 +326,34 @@ public class GameManager : MonoBehaviour
                     break;
             }
         }
+    }
+
+    private void GetDummyTouchInput()
+    {
+      if (Input.GetKey(KeyCode.Mouse0))
+      {
+        Vector3 ray = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+        RotateArrow(ray);
+      }
+
+      if (Input.GetKeyUp(KeyCode.Mouse0))
+      {
+        playerTouching = true;
+      }
+    }
+
+    private void RotateArrow(Vector3 touch)
+    {
+        float angle = Vector3.Angle(activeArrow.transform.right, touch);
+        if (minArrowRotateAngle > angle)
+        {
+            angle = minArrowRotateAngle;
+        }
+        else if (angle > maxArrowRotateAngle)
+        {
+            angle = maxArrowRotateAngle;
+        }
+
+        activeArrow.transform.Rotate(activeArrow.transform.forward, angle);
     }
 }

@@ -6,7 +6,9 @@ public class ArrowController : MonoBehaviour
 {
     private GameManager gm;
     private Rigidbody rb;
+    
     public float speed;
+    public float selfDestructTime;
 
     private void Awake()
     {
@@ -25,9 +27,15 @@ public class ArrowController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Vector3 moveVector = new Vector3(0f, 0f, speed) * Time.deltaTime;
+        if (speed > 0f)
+        {
+            StartCoroutine(BeginSelfDestruct());
 
-        rb.MovePosition(rb.position + moveVector);
+            // Added Direction to moveVector.
+            Vector3 moveVector = new Vector3(0f, transform.eulerAngles.z, 0f) * Time.deltaTime * speed;
+
+            rb.MovePosition(rb.position + moveVector);
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -48,5 +56,13 @@ public class ArrowController : MonoBehaviour
 
         gameObject.SetActive(false);
         balloon.gameObject.SetActive(false);
+    }
+
+    private IEnumerator BeginSelfDestruct()
+    {
+        yield return new WaitForSeconds(selfDestructTime);
+        gm.DecrementArrows();
+
+        gameObject.SetActive(false);
     }
 }
