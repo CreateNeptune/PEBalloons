@@ -30,10 +30,7 @@ public class ArrowController : MonoBehaviour
         if (speed > 0f)
         {
             StartCoroutine(BeginSelfDestruct());
-
-            // Added Direction to moveVector.
-            Vector3 moveVector = new Vector3(0f, transform.eulerAngles.z, 0f) * Time.deltaTime * speed;
-
+            Vector3 moveVector = transform.right * speed * Time.deltaTime;
             rb.MovePosition(rb.position + moveVector);
         }
     }

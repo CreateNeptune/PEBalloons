@@ -17,7 +17,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float arrowScale;
     [SerializeField] private float minArrowRotateAngle;
     [SerializeField] private float maxArrowRotateAngle;
-    
+
+    private Vector2 startPosition = Vector2.zero;
+    private Vector2 touchPosition;
+    private Vector3 currentArrowRotation;
+    [SerializeField] private float arrowRotateSensitivity;
+
     [SerializeField] private GameObject balloon;
     private List<GameObject> balloons = new List<GameObject>();
     [SerializeField] private GameObject arrow;
@@ -284,22 +289,20 @@ public class GameManager : MonoBehaviour
 
     private void GetInput()
     {
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
         if (phoneTesting)
             GetTouchInput();
-            
-            // Test Method.
-            //GetDummyTouchInput();
-        else
-            playerTouching = Input.anyKey;
-#else
-        GetTouchInput();
-#endif
+        else 
+            GetMouseClickInput();
+        
+    #else
+            GetTouchInput();
+    #endif
     }
 
     private void GetTouchInput()
     {
-        if (Input.touchCount > 0)
+        if (Input.touchCount > 0 && arrowAvailable)
         {
             // Get the first touch
             Touch touch = Input.GetTouch(0);
@@ -307,13 +310,15 @@ public class GameManager : MonoBehaviour
             switch (touch.phase)
             {
                 case TouchPhase.Began:
-                    // TODO: Establish a "start point"
-                    playerTouching = true;
-                    RotateArrow(touch.position);
+                    playerTouching = false;
+                    if (startPosition == Vector2.zero)
+                    {
+                      startPosition = touch.position;
+                    }
                     break;
                 case TouchPhase.Moved:
-                    // TODO: Rotate arrow around a fixed point to aim it. Limit it to some range.
-                    RotateArrow(touch.position);
+                    touchPosition = touch.position;
+                    RotateArrow(touchPosition);
                     break;
                 case TouchPhase.Stationary:
                     break;
@@ -321,39 +326,75 @@ public class GameManager : MonoBehaviour
                     playerTouching = false;
                     break;
                 case TouchPhase.Ended:
-                    // TODO: Shoot arrow at the current angle.
-                    playerTouching = false;
+                    playerTouching = true;
                     break;
             }
         }
     }
 
-    private void GetDummyTouchInput()
+    private void GetMouseClickInput()
     {
-      if (Input.GetKey(KeyCode.Mouse0))
-      {
-        Vector3 ray = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-        RotateArrow(ray);
-      }
+        if (arrowAvailable)
+        { 
+            if (Input.GetKey(KeyCode.Mouse0))
+            {
+                if (startPosition == Vector2.zero) 
+                {
+                    startPosition = Input.mousePosition;      
+                }
+                touchPosition = Input.mousePosition;
+                RotateArrow(touchPosition);
+            }
 
-      if (Input.GetKeyUp(KeyCode.Mouse0))
-      {
-        playerTouching = true;
-      }
+            if (Input.GetKeyUp(KeyCode.Mouse0))
+            {
+                playerTouching = true;
+            }
+        }
     }
 
     private void RotateArrow(Vector3 touch)
     {
-        float angle = Vector3.Angle(activeArrow.transform.right, touch);
-        if (minArrowRotateAngle > angle)
+        if (startPosition.y > touch.y)
         {
-            angle = minArrowRotateAngle;
+            activeArrow.transform.Rotate(Vector3.back, arrowRotateSensitivity * Time.deltaTime);
         }
-        else if (angle > maxArrowRotateAngle)
+        else if (startPosition.y < touch.y)
         {
-            angle = maxArrowRotateAngle;
+            activeArrow.transform.Rotate(Vector3.back, -arrowRotateSensitivity * Time.deltaTime);
         }
 
-        activeArrow.transform.Rotate(activeArrow.transform.forward, angle);
+        // Check the boundaries and Clamp it to nearest limit.
+        currentArrowRotation = activeArrow.transform.localRotation.eulerAngles;
+        currentArrowRotation.z = ConvertToAngle180(currentArrowRotation.z);
+        currentArrowRotation.z = Mathf.Clamp(currentArrowRotation.z, minArrowRotateAngle, maxArrowRotateAngle);
+        activeArrow.transform.localRotation = Quaternion.Euler(currentArrowRotation);
+    }
+
+    /// <summary>
+    /// Convert angles in terms of 360 to 180.
+    /// TODO: Move to Helper.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    private float ConvertToAngle180(float input)
+    {
+        while (input > 360)
+        {
+            input = input - 360;
+        }
+        while (input < -360)
+        {
+            input = input + 360;
+        }
+        if (input > 180)
+        {
+            input = input - 360;
+        }
+        if (input < -180)
+        {
+            input = 360 + input;
+        }
+        return input;
     }
 }
