@@ -316,11 +316,13 @@ public class GameManager : MonoBehaviour
                 case TouchPhase.Moved:
                     touchPosition = touch.position;
                     RotateArrow(touchPosition);
+
+                    // Reset start position to new location.
+                    startPosition = touchPosition;
                     break;
                 case TouchPhase.Stationary:
                     break;
                 case TouchPhase.Canceled:
-                    playerShooting = false;
                     break;
                 case TouchPhase.Ended:
                     playerShooting = true;
@@ -342,6 +344,7 @@ public class GameManager : MonoBehaviour
                 touchPosition = Input.mousePosition;
                 RotateArrow(touchPosition);
 
+                // Reset start position to new location.
                 startPosition = touchPosition;
             }
             else if (Input.GetKeyUp(KeyCode.Mouse0))
