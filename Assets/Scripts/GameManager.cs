@@ -282,7 +282,7 @@ public class GameManager : MonoBehaviour
 
         explosion.GetComponent<AudioSource>().Play();
 
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(3f);
 
         explosion.SetActive(false);
     }
