@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
 
     // Scoring
     [SerializeField] private int peScoreMultiplier;
-    private int score;
+    public int score;
     [SerializeField] private GameObject scoreText;
     [SerializeField] private GameObject dollarBillExplosion;
     private List<GameObject> dollarBillExplosions = new List<GameObject>();
