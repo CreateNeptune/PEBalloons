@@ -282,8 +282,15 @@ public class GameManager : MonoBehaviour
 
         explosion.GetComponent<AudioSource>().Play();
 
-        yield return new WaitForSeconds(3f);
+        // Only chain react if it's very close to adjacent; otherwise this looks weird.
+        Collider explosionCollider = explosion.transform.Find("Collider").GetComponent<Collider>();
+        explosionCollider.enabled = true;
 
+        yield return new WaitForSeconds(1f);
+        explosionCollider.enabled = false;
+
+        // Set inactive after end of explosion.
+        yield return new WaitForSeconds(2f);
         explosion.SetActive(false);
     }
 
