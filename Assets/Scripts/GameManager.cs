@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
 {
     // Controls
     [SerializeField] private bool phoneTesting;
-    private bool playerTouching;
+    private bool playerShooting;
     private GameObject activeArrow;
     [SerializeField] private Transform arrowGeneratorT;
     private bool arrowAvailable = true;
@@ -194,10 +194,10 @@ public class GameManager : MonoBehaviour
     private void FixedUpdate()
     {
         // TODO: If the arrow is available and player touches, fire and make the arrow immediately unavailable until it can reload.
-        if (playerTouching && arrowAvailable)
+        if (playerShooting && arrowAvailable)
         {
             print("fire");
-            playerTouching = false;
+            playerShooting = false;
             arrowAvailable = false;
 
             FireArrow();
@@ -310,11 +310,8 @@ public class GameManager : MonoBehaviour
             switch (touch.phase)
             {
                 case TouchPhase.Began:
-                    playerTouching = false;
-                    if (startPosition == Vector2.zero)
-                    {
-                      startPosition = touch.position;
-                    }
+                    playerShooting = false;
+                    startPosition = touch.position;
                     break;
                 case TouchPhase.Moved:
                     touchPosition = touch.position;
@@ -323,10 +320,10 @@ public class GameManager : MonoBehaviour
                 case TouchPhase.Stationary:
                     break;
                 case TouchPhase.Canceled:
-                    playerTouching = false;
+                    playerShooting = false;
                     break;
                 case TouchPhase.Ended:
-                    playerTouching = true;
+                    playerShooting = true;
                     break;
             }
         }
@@ -336,19 +333,20 @@ public class GameManager : MonoBehaviour
     {
         if (arrowAvailable)
         { 
-            if (Input.GetKey(KeyCode.Mouse0))
+            if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                if (startPosition == Vector2.zero) 
-                {
-                    startPosition = Input.mousePosition;      
-                }
+                startPosition = Input.mousePosition;
+            }
+            else if (Input.GetKey(KeyCode.Mouse0))
+            {
                 touchPosition = Input.mousePosition;
                 RotateArrow(touchPosition);
-            }
 
-            if (Input.GetKeyUp(KeyCode.Mouse0))
+                startPosition = touchPosition;
+            }
+            else if (Input.GetKeyUp(KeyCode.Mouse0))
             {
-                playerTouching = true;
+                playerShooting = true;
             }
         }
     }
